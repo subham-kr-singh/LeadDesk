@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@/db';
-import { leads } from '@/db/schema';
+import { leads, Lead } from '@/db/schema';
 import { desc } from 'drizzle-orm';
 import AdminHeader from '@/components/AdminHeader';
 import LeadsTable from '@/components/LeadsTable';
@@ -15,7 +15,7 @@ export default async function AdminPage() {
     redirect('/login');
   }
 
-  let allLeads = [];
+  let allLeads: Lead[] = [];
   try {
     allLeads = await db.select().from(leads).orderBy(desc(leads.createdAt));
   } catch (error) {
