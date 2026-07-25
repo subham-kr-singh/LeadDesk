@@ -78,7 +78,7 @@ The database schema (`src/db/schema.ts`) consists of two core tables:
 | `id` | `text` (UUID) | Unique identifier for each inbound lead request. |
 | `name` | `text` | Full name of client / lead contact. |
 | `email` | `text` | Lead email address. |
-| `budget_range` | `text` | Categorical budget tier (`< $5,000`, `$5,000 - $15,000`, etc.) used for lead qualification. |
+| `budget_range` | `text` | Categorical budget tier (`< ₹50,000`, `₹50,000 - ₹2,00,000`, etc.) used for lead qualification. |
 | `message` | `text` | Project requirements overview. |
 | `status` | `enum` (`new`, `contacted`, `closed`) | Tracks progress state in admin pipeline, defaulting to `new`. |
 | `created_at` | `timestamp` | Timestamp of lead submission. |
