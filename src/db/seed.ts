@@ -1,14 +1,22 @@
 import * as dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
-import { db } from './index';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
 import { adminUsers } from './schema';
 import { eq } from 'drizzle-orm';
 
 dotenv.config();
 
 async function main() {
-  const email = process.env.ADMIN_SEED_EMAIL || 'admin@leaddesk.com';
-  const password = process.env.ADMIN_SEED_PASSWORD || 'AdminPass123!';
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (!databaseUrl) {
+    console.error('Missing DATABASE_URL environment variable.');
+    process.exit(1);
+  }
+
+  const email = process.env.ADMIN_SEED_EMAIL;
+  const password = process.env.ADMIN_SEED_PASSWORD;
 
   if (!email || !password) {
     console.error('Missing ADMIN_SEED_EMAIL or ADMIN_SEED_PASSWORD environment variables.');
@@ -17,22 +25,33 @@ async function main() {
 
   console.log(`Seeding admin account for: ${email}...`);
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  // Use postgres-js driver for the seed script (runs in Node.js, not serverless)
+  const client = postgres(databaseUrl, { max: 1, ssl: 'require' });
+  const db = drizzle(client);
 
-  const existingUsers = await db.select().from(adminUsers).where(eq(adminUsers.email, email.toLowerCase()));
+  try {
+    const passwordHash = await bcrypt.hash(password, 10);
 
-  if (existingUsers.length > 0) {
-    await db
-      .update(adminUsers)
-      .set({ passwordHash })
+    const existingUsers = await db
+      .select()
+      .from(adminUsers)
       .where(eq(adminUsers.email, email.toLowerCase()));
-    console.log(`Successfully updated password for existing admin: ${email}`);
-  } else {
-    await db.insert(adminUsers).values({
-      email: email.toLowerCase(),
-      passwordHash,
-    });
-    console.log(`Successfully created new admin user: ${email}`);
+
+    if (existingUsers.length > 0) {
+      await db
+        .update(adminUsers)
+        .set({ passwordHash })
+        .where(eq(adminUsers.email, email.toLowerCase()));
+      console.log(`✓ Successfully updated password for existing admin: ${email}`);
+    } else {
+      await db.insert(adminUsers).values({
+        email: email.toLowerCase(),
+        passwordHash,
+      });
+      console.log(`✓ Successfully created new admin user: ${email}`);
+    }
+  } finally {
+    await client.end();
   }
 
   process.exit(0);
