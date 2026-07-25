@@ -1,42 +1,49 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { LogOut, ShieldCheck, User } from 'lucide-react';
 
 interface AdminHeaderProps {
   userEmail?: string | null;
 }
 
+function initialsFromEmail(email?: string | null) {
+  if (!email) return '?';
+  const local = email.split('@')[0] ?? '';
+  return (local.slice(0, 2) || '?').toUpperCase();
+}
+
 export default function AdminHeader({ userEmail }: AdminHeaderProps) {
   return (
-    <header className="w-full bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 lg:px-8 py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-base font-bold text-white tracking-tight leading-none">
-              LeadDesk <span className="text-indigo-400">Admin</span>
-            </h1>
-            <p className="text-[11px] text-slate-400 mt-0.5">Lead Operations & Management</p>
-          </div>
+    <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-zinc-200 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-sm font-semibold tracking-tight text-zinc-950 truncate">
+            LeadDesk Mini
+          </span>
+          <span className="hidden sm:inline font-mono text-[10px] font-medium uppercase tracking-wider text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded">
+            Admin
+          </span>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 shrink-0">
           {userEmail && (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-950/60 border border-slate-800 text-xs text-slate-300">
-              <User className="w-3.5 h-3.5 text-slate-400" />
-              <span className="font-medium text-slate-200">{userEmail}</span>
+            <div className="hidden sm:flex items-center gap-2.5 pl-1">
+              <span
+                className="w-8 h-8 rounded-full bg-zinc-100 ring-1 ring-zinc-200/80 flex items-center justify-center font-mono text-xs font-medium text-zinc-600"
+                aria-hidden
+              >
+                {initialsFromEmail(userEmail)}
+              </span>
+              <span className="text-xs text-zinc-600 max-w-[180px] truncate">{userEmail}</span>
             </div>
           )}
 
           <button
+            type="button"
             onClick={() => signOut({ callbackUrl: '/login' })}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 text-xs font-semibold transition-all active:scale-[0.98]"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-950 px-3 py-2 rounded-lg hover:bg-zinc-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
+            Sign out
           </button>
         </div>
       </div>

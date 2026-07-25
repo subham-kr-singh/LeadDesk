@@ -13,14 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LeadDesk Mini — High-Converting Lead Capture Platform",
-  description: "Capture, qualify, and manage client project leads with real-time status tracking.",
+  title: "LeadDesk Mini — Lead capture for agencies",
+  description: "Capture project inquiries and track follow-up in one place.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#020617",
+  themeColor: "#fafafa",
 };
 
 export default function RootLayout({
@@ -31,9 +31,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">{children}</body>
+      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-950 font-sans">
+        {children}
+      </body>
     </html>
   );
 }

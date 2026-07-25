@@ -6,7 +6,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, LoginFormData } from '@/lib/validations';
 import { signIn } from 'next-auth/react';
-import { Lock, Mail, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
+
+const inputBase =
+  'block w-full px-3.5 py-2.5 bg-white border border-zinc-200/80 rounded-lg text-sm font-normal text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,7 +37,7 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        setServerError('Invalid email or password. Please check your credentials and try again.');
+        setServerError('Invalid email or password. Check your credentials and try again.');
         setIsSubmitting(false);
       } else {
         router.push('/admin');
@@ -41,92 +45,91 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error('Login error:', err);
-      setServerError('An unexpected error occurred. Please try again.');
+      setServerError('Sign-in failed unexpectedly. Wait a moment and try again.');
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 mb-4 shadow-lg shadow-indigo-500/10">
-          <ShieldCheck className="w-6 h-6" />
+    <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 px-4 sm:px-6">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center mb-8">
+        <div className="inline-flex w-10 h-10 rounded-lg bg-zinc-950 text-white text-sm font-bold items-center justify-center mb-4">
+          L
         </div>
-        <h2 className="text-3xl font-bold tracking-tight text-white">
-          LeadDesk <span className="text-indigo-400">Admin</span>
-        </h2>
-        <p className="mt-2 text-sm text-slate-400">
-          Sign in to access your lead dashboard & management tools
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-950">LeadDesk Mini</h1>
+        <p className="mt-2 text-sm text-zinc-500">Sign in to view and update leads.</p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 py-8 px-6 shadow-2xl rounded-2xl sm:px-10">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-6 sm:px-8 rounded-2xl ring-1 ring-zinc-200/80 shadow-xl shadow-zinc-950/5">
           {serverError && (
-            <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-              <span>{serverError}</span>
+            <div
+              role="alert"
+              className="mb-6 p-4 rounded-lg bg-red-50 ring-1 ring-red-200/80 text-red-700 text-sm font-medium"
+            >
+              {serverError}
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Email Address
+              <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-2">
+                Email
               </label>
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Mail className="h-4 w-4" />
-                </div>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="admin@leaddesk.com"
-                  {...register('email')}
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
-                />
-              </div>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@agency.com"
+                {...register('email')}
+                className={`${inputBase} ${errors.email ? 'border-red-500 focus:ring-red-500' : ''}`}
+              />
               {errors.email && (
-                <p className="mt-1.5 text-xs text-rose-400">{errors.email.message}</p>
+                <p className="text-red-600 text-xs mt-1 font-medium">{errors.email.message}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-2">
                 Password
               </label>
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Lock className="h-4 w-4" />
-                </div>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  {...register('password')}
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
-                />
-              </div>
+              <input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                {...register('password')}
+                className={`${inputBase} ${errors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
+              />
               {errors.password && (
-                <p className="mt-1.5 text-xs text-rose-400">{errors.password.message}</p>
+                <p className="text-red-600 text-xs mt-1 font-medium">{errors.password.message}</p>
               )}
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 shadow-lg shadow-indigo-600/20 active:scale-[0.99]"
+              className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-lg text-sm font-medium text-white bg-[#2563EB] hover:bg-blue-700 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2"
             >
               {isSubmitting ? (
-                <span>Signing in...</span>
-              ) : (
                 <>
-                  <span>Sign in to Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                  <span>Signing in…</span>
                 </>
+              ) : (
+                <span>Sign in</span>
               )}
             </button>
           </form>
+
+          <p className="mt-6 text-center">
+            <Link
+              href="/"
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 rounded-sm"
+            >
+              ← Back to inquiry form
+            </Link>
+          </p>
         </div>
       </div>
     </div>

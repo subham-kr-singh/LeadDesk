@@ -1,23 +1,16 @@
-import Link from 'next/link';
-
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-slate-800 bg-slate-950/80 backdrop-blur-md py-6 px-4 text-center text-sm text-slate-400">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-200">LeadDesk Mini</span>
-          <span className="text-slate-600">•</span>
-          <span className="text-xs text-slate-500">Lead Capture Platform</span>
-        </div>
-        <p className="text-xs text-slate-400">
-          Built for Digital Heroes Training Task{' '}
+    <footer className="w-full border-t border-zinc-200/80 bg-white py-6 px-4">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
+        <span className="font-medium text-zinc-700">LeadDesk Mini</span>
+        <p className="text-xs text-zinc-500 text-center sm:text-right">
           <a
             href="https://digitalheroesco.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-indigo-400 hover:text-indigo-300 font-medium underline underline-offset-4 transition-colors"
+            className="text-[#2563EB] hover:text-blue-700 font-medium underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 rounded-sm"
           >
-            https://digitalheroesco.com
+            Built for Digital Heroes Training Task
           </a>
         </p>
       </div>

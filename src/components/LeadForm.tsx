@@ -1,11 +1,29 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useMemo, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { leadSchema, LeadFormData } from '@/lib/validations';
 import { createLeadAction } from '@/app/actions/leadActions';
-import { User, Mail, DollarSign, MessageSquare, CheckCircle2, AlertTriangle, Send, Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
+
+const BUDGET_OPTIONS = [
+  { label: 'Under $5,000', hint: 'Discovery or small scope', value: '< $5,000' },
+  { label: '$5,000 – $15,000', hint: 'Typical agency sprint', value: '$5,000 - $15,000' },
+  { label: '$15,000 – $50,000', hint: 'Multi-phase build', value: '$15,000 - $50,000' },
+  { label: '$50,000+', hint: 'Retainer or large program', value: '$50,000+' },
+] as const;
+
+const MIN_MESSAGE = 10;
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="mt-1.5 text-sm text-red-600" role="alert">
+      {message}
+    </p>
+  );
+}
 
 export default function LeadForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,9 +35,12 @@ export default function LeadForm() {
     handleSubmit,
     reset,
     setError,
+    setValue,
+    control,
     formState: { errors },
   } = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
+    mode: 'onTouched',
     defaultValues: {
       name: '',
       email: '',
@@ -27,6 +48,21 @@ export default function LeadForm() {
       message: '',
     },
   });
+
+  const name = useWatch({ control, name: 'name' }) ?? '';
+  const email = useWatch({ control, name: 'email' }) ?? '';
+  const budgetValue = useWatch({ control, name: 'budgetRange' }) ?? '';
+  const messageValue = useWatch({ control, name: 'message' }) ?? '';
+
+  const progress = useMemo(() => {
+    let steps = 0;
+    if (name.trim().length >= 2 && email.includes('@')) steps += 1;
+    if (budgetValue) steps += 1;
+    if (messageValue.trim().length >= MIN_MESSAGE) steps += 1;
+    return steps;
+  }, [name, email, budgetValue, messageValue]);
+
+  const messageRemaining = Math.max(0, MIN_MESSAGE - messageValue.trim().length);
 
   const onSubmit = async (data: LeadFormData) => {
     setIsSubmitting(true);
@@ -46,7 +82,7 @@ export default function LeadForm() {
             }
           });
         }
-        setServerError(response.error || 'Validation failed.');
+        setServerError(response.error || 'Please fix the highlighted fields and try again.');
         setIsSubmitting(false);
         return;
       }
@@ -55,178 +91,196 @@ export default function LeadForm() {
       reset();
     } catch (err) {
       console.error('Lead submission exception:', err);
-      setServerError('An unexpected error occurred. Please try again.');
+      setServerError('We could not send your inquiry. Check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const inputClass = (hasError: boolean) =>
+    [
+      'w-full rounded-xl px-4 py-3 text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400',
+      'bg-zinc-100/80 border border-transparent',
+      'transition-[background-color,box-shadow,border-color]',
+      'focus:bg-white focus:border-zinc-300 focus:outline-none focus:ring-4 focus:ring-[#2563EB]/15',
+      hasError ? 'border-red-400 bg-red-50/50 focus:ring-red-500/20' : '',
+    ].join(' ');
+
   if (submitSuccess) {
     return (
-      <div className="bg-slate-900/90 border border-emerald-500/30 rounded-3xl p-8 sm:p-10 text-center shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-300">
-        <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
-          <CheckCircle2 className="w-8 h-8" />
+      <div className="rounded-2xl border border-zinc-200/80 bg-white p-8 sm:p-10 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+        <div className="flex flex-col items-center text-center max-w-md mx-auto">
+          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#2563EB]/10 text-[#2563EB]">
+            <Check className="h-7 w-7" strokeWidth={2.25} aria-hidden />
+          </div>
+          <h3 className="text-xl font-semibold tracking-tight text-zinc-900">You&apos;re on the list</h3>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-600">
+            We saved your inquiry and will email you at the address you provided. Most replies go out within one
+            business day.
+          </p>
+          <button
+            type="button"
+            onClick={() => setSubmitSuccess(false)}
+            className="mt-8 text-sm font-medium text-[#2563EB] hover:text-blue-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 rounded-sm"
+          >
+            Submit another project
+          </button>
         </div>
-        <h3 className="text-2xl font-bold text-white mb-2">Lead Received!</h3>
-        <p className="text-slate-300 max-w-md mx-auto text-sm leading-relaxed mb-8">
-          Thank you for reaching out. Our team has received your information and will review your project requirements promptly.
-        </p>
-        <button
-          onClick={() => setSubmitSuccess(false)}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition-all border border-slate-700 hover:border-slate-600 shadow-md"
-        >
-          Submit Another Request
-        </button>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden group">
-      {/* Decorative ambient background blur */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-500"></div>
-
-      <div className="mb-8">
-        <h3 className="text-2xl font-bold text-white tracking-tight">Let's talk about your project</h3>
-        <p className="text-sm text-slate-400 mt-1">Fill out the quick form below and we'll get back to you within 24 hours.</p>
+    <div className="rounded-2xl border border-zinc-200/80 bg-white shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] overflow-hidden">
+      <div className="border-b border-zinc-100 bg-zinc-50/80 px-5 sm:px-7 py-4">
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <p className="text-sm font-medium text-zinc-800">Start your inquiry</p>
+          <span className="font-mono text-[11px] text-zinc-500 tabular-nums">
+            {progress}/3 ready
+          </span>
+        </div>
+        <div className="flex gap-1.5" aria-hidden>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className={`h-1 flex-1 rounded-full transition-colors duration-300 motion-reduce:transition-none ${
+                i < progress ? 'bg-[#2563EB]' : 'bg-zinc-200'
+              }`}
+            />
+          ))}
+        </div>
       </div>
 
-      {serverError && (
-        <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-          <span>{serverError}</span>
-        </div>
-      )}
+      <div className="p-5 sm:p-7">
+        {serverError && (
+          <div role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            {serverError}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Name Field */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
-              Your Name <span className="text-indigo-400">*</span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                <User className="h-4 w-4" />
-              </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8" noValidate>
+          <fieldset className="space-y-4 border-0 p-0 m-0">
+            <legend className="text-xs font-semibold text-zinc-500 mb-1">Who should we reply to?</legend>
+
+            <div>
+              <label htmlFor="name" className="sr-only">
+                Your name
+              </label>
               <input
                 id="name"
                 type="text"
-                placeholder="Sarah Jenkins"
+                autoComplete="name"
+                placeholder="Full name"
+                aria-invalid={!!errors.name}
                 {...register('name')}
-                className={`block w-full pl-10 pr-4 py-3 bg-slate-950/70 border ${
-                  errors.name ? 'border-rose-500/60 focus:ring-rose-500/40' : 'border-slate-800 focus:ring-indigo-500/40 focus:border-indigo-500'
-                } rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 text-sm transition-all`}
+                className={inputClass(!!errors.name)}
               />
+              <FieldError message={errors.name?.message} />
             </div>
-            {errors.name && <p className="mt-1.5 text-xs text-rose-400">{errors.name.message}</p>}
-          </div>
 
-          {/* Email Field */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-              Email Address <span className="text-indigo-400">*</span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                <Mail className="h-4 w-4" />
-              </div>
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email
+              </label>
               <input
                 id="email"
                 type="email"
-                placeholder="sarah@company.com"
+                autoComplete="email"
+                inputMode="email"
+                placeholder="Work email"
+                aria-invalid={!!errors.email}
                 {...register('email')}
-                className={`block w-full pl-10 pr-4 py-3 bg-slate-950/70 border ${
-                  errors.email ? 'border-rose-500/60 focus:ring-rose-500/40' : 'border-slate-800 focus:ring-indigo-500/40 focus:border-indigo-500'
-                } rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 text-sm transition-all`}
+                className={inputClass(!!errors.email)}
               />
+              <FieldError message={errors.email?.message} />
             </div>
-            {errors.email && <p className="mt-1.5 text-xs text-rose-400">{errors.email.message}</p>}
-          </div>
-        </div>
+          </fieldset>
 
-        {/* Budget Range Dropdown */}
-        <div>
-          <label htmlFor="budgetRange" className="block text-sm font-medium text-slate-300 mb-2">
-            Estimated Budget Range <span className="text-indigo-400">*</span>
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-              <DollarSign className="h-4 w-4" />
+          <fieldset className="space-y-3 border-0 p-0 m-0">
+            <legend className="text-xs font-semibold text-zinc-500 mb-1">Estimated budget</legend>
+            <input type="hidden" {...register('budgetRange')} />
+            <div className="space-y-2" role="radiogroup" aria-label="Estimated budget">
+              {BUDGET_OPTIONS.map((opt) => {
+                const selected = budgetValue === opt.value;
+                const id = `budget-${opt.value.replace(/\s+/g, '-')}`;
+                return (
+                  <label
+                    key={opt.value}
+                    htmlFor={id}
+                    className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3.5 transition-colors motion-reduce:transition-none ${
+                      selected
+                        ? 'border-[#2563EB] bg-[#2563EB]/[0.06] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.25)]'
+                        : 'border-zinc-200/90 bg-zinc-50/50 hover:border-zinc-300 hover:bg-zinc-50'
+                    } ${errors.budgetRange && !selected ? 'border-red-200' : ''}`}
+                  >
+                    <input
+                      id={id}
+                      type="radio"
+                      name="budgetRangeChoice"
+                      value={opt.value}
+                      checked={selected}
+                      onChange={() =>
+                        setValue('budgetRange', opt.value, { shouldValidate: true, shouldDirty: true })
+                      }
+                      className="mt-1 h-4 w-4 shrink-0 border-zinc-300 text-[#2563EB] focus:ring-[#2563EB] focus:ring-offset-0"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-medium text-zinc-900">{opt.label}</span>
+                      <span className="block text-xs text-zinc-500 mt-0.5">{opt.hint}</span>
+                    </span>
+                  </label>
+                );
+              })}
             </div>
-            <select
-              id="budgetRange"
-              {...register('budgetRange')}
-              className={`block w-full pl-10 pr-10 py-3 bg-slate-950/70 border ${
-                errors.budgetRange ? 'border-rose-500/60 focus:ring-rose-500/40' : 'border-slate-800 focus:ring-indigo-500/40 focus:border-indigo-500'
-              } rounded-xl text-slate-100 focus:outline-none focus:ring-2 text-sm transition-all appearance-none cursor-pointer`}
-            >
-              <option value="" disabled className="bg-slate-900 text-slate-400">
-                Select your budget...
-              </option>
-              <option value="< $5,000" className="bg-slate-900 text-slate-100">
-                Less than $5,000
-              </option>
-              <option value="$5,000 - $15,000" className="bg-slate-900 text-slate-100">
-                $5,000 - $15,000
-              </option>
-              <option value="$15,000 - $50,000" className="bg-slate-900 text-slate-100">
-                $15,000 - $50,000
-              </option>
-              <option value="$50,000+" className="bg-slate-900 text-slate-100">
-                $50,000+
-              </option>
-            </select>
-            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-500">
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-              </svg>
-            </div>
-          </div>
-          {errors.budgetRange && <p className="mt-1.5 text-xs text-rose-400">{errors.budgetRange.message}</p>}
-        </div>
+            <FieldError message={errors.budgetRange?.message} />
+          </fieldset>
 
-        {/* Message Field */}
-        <div>
-          <label htmlFor="message" className="block text-sm font-medium text-slate-300 mb-2">
-            Project Overview & Goals <span className="text-indigo-400">*</span>
-          </label>
-          <div className="relative">
-            <div className="absolute top-3.5 left-0 pl-3.5 flex items-start pointer-events-none text-slate-500">
-              <MessageSquare className="h-4 w-4" />
+          <fieldset className="space-y-2 border-0 p-0 m-0">
+            <div className="flex items-baseline justify-between gap-2">
+              <legend className="text-xs font-semibold text-zinc-500">What are you building?</legend>
+              <span
+                className={`font-mono text-[11px] tabular-nums ${
+                  messageRemaining > 0 ? 'text-zinc-400' : 'text-emerald-600'
+                }`}
+              >
+                {messageRemaining > 0 ? `${messageRemaining} more chars` : 'Looks good'}
+              </span>
             </div>
+            <label htmlFor="message" className="sr-only">
+              Project message
+            </label>
             <textarea
               id="message"
-              rows={4}
-              placeholder="Tell us about your product goals, timeline, and key requirements..."
+              rows={5}
+              placeholder="Share goals, timeline, and anything that helps us respond with useful next steps…"
+              aria-invalid={!!errors.message}
               {...register('message')}
-              className={`block w-full pl-10 pr-4 py-3 bg-slate-950/70 border ${
-                errors.message ? 'border-rose-500/60 focus:ring-rose-500/40' : 'border-slate-800 focus:ring-indigo-500/40 focus:border-indigo-500'
-              } rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 text-sm transition-all resize-y`}
-            ></textarea>
-          </div>
-          {errors.message && <p className="mt-1.5 text-xs text-rose-400">{errors.message.message}</p>}
-        </div>
+              className={`${inputClass(!!errors.message)} min-h-[140px] resize-y leading-relaxed`}
+            />
+            <FieldError message={errors.message?.message} />
+          </fieldset>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 shadow-xl shadow-indigo-600/20 text-sm"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Submitting Request...</span>
-            </>
-          ) : (
-            <>
-              <span>Send Project Brief</span>
-              <Send className="w-4 h-4" />
-            </>
-          )}
-        </button>
-      </form>
+          <div className="pt-2 border-t border-zinc-100">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] py-3.5 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-600 active:bg-blue-700 disabled:opacity-55 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
+                  Sending…
+                </>
+              ) : (
+                'Send inquiry'
+              )}
+            </button>
+            <p className="mt-3 text-center text-xs text-zinc-500">
+              No spam — just a direct reply from our team.
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

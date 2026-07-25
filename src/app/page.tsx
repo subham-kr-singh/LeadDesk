@@ -1,80 +1,78 @@
 import LeadForm from '@/components/LeadForm';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { Sparkles, Shield, Zap, BarChart3, ArrowUpRight } from 'lucide-react';
+
+const highlights = [
+  'One form collects name, budget, and project context.',
+  'Every inquiry lands in a single admin inbox.',
+  'Update status as you reach out and close deals.',
+];
+
+function CheckIcon() {
+  return (
+    <svg className="w-4 h-4 shrink-0 text-[#2563EB]" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path
+        d="M3.5 8.5L6.5 11.5L12.5 4.5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white relative overflow-hidden">
-      {/* Dynamic Background Accents */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-indigo-600/15 via-purple-600/5 to-transparent blur-3xl pointer-events-none"></div>
-
-      {/* Header / Navigation */}
-      <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-600/30">
-            L
+    <div className="min-h-screen bg-grid-architectural flex flex-col">
+      <header className="border-b border-zinc-200/80 bg-white/70 backdrop-blur-sm sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-zinc-950 text-white text-sm font-bold flex items-center justify-center">
+              L
+            </div>
+            <span className="text-sm font-semibold tracking-tight text-zinc-950">
+              LeadDesk Mini
+            </span>
           </div>
-          <span className="text-lg font-bold tracking-tight text-white">
-            LeadDesk <span className="text-indigo-400">Mini</span>
-          </span>
+          <Link
+            href="/login"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-950 transition-colors rounded-md px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2"
+          >
+            Team login
+          </Link>
         </div>
-
-        <Link
-          href="/admin"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 transition-all shadow-sm"
-        >
-          <span>Admin Portal</span>
-          <ArrowUpRight className="w-3.5 h-3.5" />
-        </Link>
       </header>
 
-      {/* Hero Section */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: Benefit-driven Hero Copy */}
-          <div className="lg:col-span-6 space-y-8 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Next-Gen Lead Intake System</span>
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+          <div className="order-2 lg:order-1 lg:col-span-6 xl:col-span-7 space-y-8">
+            <div className="space-y-4">
+              <h1 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-950 leading-[1.12]">
+                Tell us about your project. We&apos;ll handle the rest.
+              </h1>
+              <p className="text-base text-zinc-600 max-w-lg leading-relaxed">
+                Share budget and context in a few minutes. Your team sees every inquiry in one admin inbox.
+              </p>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
-              Turn high-intent visitors into <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-indigo-200 bg-clip-text text-transparent">qualified clients</span>.
-            </h1>
+            <ul className="space-y-3 pt-2">
+              {highlights.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm text-zinc-700">
+                  <CheckIcon />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
 
-            <p className="text-base sm:text-lg text-slate-400 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
-              Capture verified project requirements, budget ranges, and customer details with an intelligent lead workflow built for high-growth agencies & SaaS.
-            </p>
-
-            {/* Feature Highlights Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-900 text-left">
-              <div className="p-3 rounded-2xl bg-slate-900/50 border border-slate-800/80">
-                <Zap className="w-5 h-5 text-indigo-400 mb-2" />
-                <h4 className="text-xs font-semibold text-slate-200">Instant Qualify</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Automated budget tiering</p>
-              </div>
-              <div className="p-3 rounded-2xl bg-slate-900/50 border border-slate-800/80">
-                <BarChart3 className="w-5 h-5 text-indigo-400 mb-2" />
-                <h4 className="text-xs font-semibold text-slate-200">Real-Time Sync</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Live status management</p>
-              </div>
-              <div className="p-3 rounded-2xl bg-slate-900/50 border border-slate-800/80">
-                <Shield className="w-5 h-5 text-indigo-400 mb-2" />
-                <h4 className="text-xs font-semibold text-slate-200">Secure Intake</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Zod server-validated</p>
-              </div>
-            </div>
           </div>
 
-          {/* Right Column: Lead Form */}
-          <div className="lg:col-span-6 w-full max-w-lg mx-auto lg:max-w-none">
+          <div className="order-1 lg:order-2 lg:col-span-6 xl:col-span-5 w-full lg:sticky lg:top-20">
             <LeadForm />
           </div>
         </div>
       </main>
 
-      {/* Footer Credit Line */}
       <Footer />
     </div>
   );

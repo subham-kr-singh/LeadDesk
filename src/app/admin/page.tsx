@@ -23,19 +23,10 @@ export default async function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-white text-zinc-950 flex flex-col font-sans">
       <AdminHeader userEmail={session.user.email} />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Lead Management Overview
-          </h2>
-          <p className="text-sm text-slate-400 mt-1">
-            Review inbound client requests, update status pipelines, and filter leads.
-          </p>
-        </div>
-
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <LeadsTable initialLeads={allLeads} />
       </main>
     </div>
