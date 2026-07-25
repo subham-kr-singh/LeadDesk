@@ -8,10 +8,10 @@ import { createLeadAction } from '@/app/actions/leadActions';
 import { Loader2, Check } from 'lucide-react';
 
 const BUDGET_OPTIONS = [
-  { label: 'Under $5,000', hint: 'Discovery or small scope', value: '< $5,000' },
-  { label: '$5,000 – $15,000', hint: 'Typical agency sprint', value: '$5,000 - $15,000' },
-  { label: '$15,000 – $50,000', hint: 'Multi-phase build', value: '$15,000 - $50,000' },
-  { label: '$50,000+', hint: 'Retainer or large program', value: '$50,000+' },
+  { label: 'Under ₹50,000', hint: 'Discovery or small scope', value: '< ₹50,000' },
+  { label: '₹50,000 – ₹2,00,000', hint: 'Typical agency sprint', value: '₹50,000 - ₹2,00,000' },
+  { label: '₹2,00,000 – ₹5,00,000', hint: 'Multi-phase build', value: '₹2,00,000 - ₹5,00,000' },
+  { label: '₹5,00,000+', hint: 'Retainer or large program', value: '₹5,00,000+' },
 ] as const;
 
 const MIN_MESSAGE = 10;
